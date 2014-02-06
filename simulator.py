@@ -6,7 +6,7 @@ import copy
 
 class Server():
     global packetSize
-    packetSize = 100
+    packetSize = 200
 
     def streamFile(self):
         network = Network()
@@ -53,7 +53,7 @@ class Network():
 
 class Client():
     global silence
-    silence = True
+    silence = False
     packets = []
 
     def connect(self):
@@ -61,10 +61,8 @@ class Client():
         self.network.connect(self)
 
     def receiveStream(self, packet):
-        #packet.bytes = [255] * len(packet.bytes)
         if len(self.packets) > 0:
             lostPackets = (packet.number - self.packets[-1].number)-1
-            print "Lost %s packets" % lostPackets
             for i in range(lostPackets):
                 lastPacket = self.packets[-1]
                 if silence:
