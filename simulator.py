@@ -6,10 +6,21 @@ import copy
 
 class Server():
     global packetSize
-    packetSize = 200
+    global header
+    header = []
+    packetSize = 3000
+
+    def readHeader(self):
+        global header
+        with open('pink_panther.au', 'rb') as musicFile:
+            for i in range(24):
+                byte = musicFile.read(1).encode('hex')
+                header.append(int(byte, 16))
+        musicFile.close()
 
     def streamFile(self):
         network = Network()
+        self.readHeader()
         with open('pink_panther.au', 'rb') as musicFile:
             eof = False
             while not eof:
@@ -38,7 +49,9 @@ class Packet():
 
 class Network():
     global threshold
-    threshold = 75
+    threshold = 40
+    global counter
+    counter = 0
     clients = []
 
     def connect(self, client):
@@ -53,7 +66,7 @@ class Network():
 
 class Client():
     global silence
-    silence = False
+    silence = True
     packets = []
 
     def connect(self):
@@ -79,7 +92,9 @@ class Client():
         for packet in self.packets:
             for byte in packet.bytes:
                 self.byteFile.append(byte)
-        with open('received_file.au', 'wb') as musicFile:
+        for i in range(len(header)):
+            self.byteFile[i] = int(header[i])
+        with open(str(100-threshold)+str(packetSize)+str(silence)+'.au', 'wb') as musicFile:
             musicFile.write(bytearray(self.byteFile))
         musicFile.close()
 
