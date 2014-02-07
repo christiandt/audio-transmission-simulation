@@ -5,14 +5,13 @@ import copy
 
 
 class Server():
-    global packetSize
     global header
     header = []
-    packetSize = 3000
+    packetSize = 30
 
     def readHeader(self):
         global header
-        with open('pink_panther.au', 'rb') as musicFile:
+        with open('poe.au', 'rb') as musicFile:
             for i in range(24):
                 byte = musicFile.read(1).encode('hex')
                 header.append(int(byte, 16))
@@ -21,11 +20,11 @@ class Server():
     def streamFile(self):
         network = Network()
         self.readHeader()
-        with open('pink_panther.au', 'rb') as musicFile:
+        with open('poe.au', 'rb') as musicFile:
             eof = False
             while not eof:
                 bytes = []
-                for i in range(packetSize):
+                for i in range(self.packetSize):
                     byte = musicFile.read(1).encode('hex')
                     if not byte:
                         eof = True
@@ -48,10 +47,7 @@ class Packet():
 
 
 class Network():
-    global threshold
-    threshold = 40
-    global counter
-    counter = 0
+    threshold = 80
     clients = []
 
     def connect(self, client):
@@ -59,14 +55,13 @@ class Network():
 
     def send(self, packet):
         loss = random.randint(1, 100)
-        if loss <= threshold:
+        if loss <= self.threshold:
             for client in self.clients:
                 client.receiveStream(packet)
 
 
 class Client():
-    global silence
-    silence = True
+    silence = False
     packets = []
 
     def connect(self):
@@ -78,7 +73,7 @@ class Client():
             lostPackets = (packet.number - self.packets[-1].number)-1
             for i in range(lostPackets):
                 lastPacket = self.packets[-1]
-                if silence:
+                if self.silence:
                     silentPacket = copy.deepcopy(lastPacket)
                     silentPacket.bytes = [255] * len(lastPacket.bytes)
                     self.packets.append(silentPacket)
@@ -94,7 +89,7 @@ class Client():
                 self.byteFile.append(byte)
         for i in range(len(header)):
             self.byteFile[i] = int(header[i])
-        with open(str(100-threshold)+str(packetSize)+str(silence)+'.au', 'wb') as musicFile:
+        with open('received_file.au', 'wb') as musicFile:
             musicFile.write(bytearray(self.byteFile))
         musicFile.close()
 
