@@ -11,7 +11,7 @@ the two ways to handle packet-loss is either to replay the lost package, or keep
 - Client: silence (how to handle packet-loss)
 
 ### Running the simulator
-chrete one or more clients, create a server, connect clients to server, stream file from server, write file in client. This can be done the following way:
+Create one or more clients, create a server, connect clients to server, stream file from server, write file in client. This can be done the following way:
 
     client = Client()
     server = Server()
